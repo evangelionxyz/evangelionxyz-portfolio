@@ -344,21 +344,6 @@ const projects = [
     featured: true,
   },
   {
-    name: 'SIPERTI Malut',
-    subtitle: 'Mining Permissions Management & Geospatial Dashboard',
-    description:
-      'An enterprise application for North Maluku Mining Permissions Management and Public Visualization, built with TypeScript, modern component architecture, and cloud deployment.',
-    tags: [
-      { name: 'TypeScript', icon: TypeScriptIcon },
-      { name: 'Product', icon: Database },
-      { name: 'Bun', icon: BunIcon },
-    ],
-    href: 'https://github.com/evangelionxyz/siperti-malut',
-    liveUrl: 'https://siperti-mu.vercel.app/',
-    tone: 'paper',
-    featured: false,
-  },
-  {
     name: 'OpenTask',
     subtitle: 'All-in-One AI-Powered Project Management Platform',
     description:
@@ -370,6 +355,21 @@ const projects = [
     ],
     href: 'https://github.com/Offside-Software/OpenTask',
     liveUrl: 'https://open-task-five.vercel.app/',
+    tone: 'paper',
+    featured: false,
+  },
+  {
+    name: 'SIPERTI Malut',
+    subtitle: 'Mining Permissions Management & Geospatial Dashboard',
+    description:
+      'An enterprise application for North Maluku Mining Permissions Management and Public Visualization, built with TypeScript, modern component architecture, and cloud deployment.',
+    tags: [
+      { name: 'TypeScript', icon: TypeScriptIcon },
+      { name: 'Product', icon: Database },
+      { name: 'Bun', icon: BunIcon },
+    ],
+    href: 'https://github.com/evangelionxyz/siperti-malut',
+    liveUrl: 'https://siperti-mu.vercel.app/',
     tone: 'paper',
     featured: false,
   },
