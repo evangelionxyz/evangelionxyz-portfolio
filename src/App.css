@@ -194,9 +194,9 @@ nav > a:hover,
 .hero-section {
   align-items: center;
   display: grid;
-  gap: clamp(2.5rem, 5vw, 5rem);
-  grid-template-columns: 1.08fr 0.92fr;
-  min-height: 640px;
+  gap: clamp(2rem, 3.5vw, 3.5rem);
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 440px);
+  min-height: 560px;
   padding-block: 3.5rem 4rem;
 }
 
@@ -364,6 +364,8 @@ h1 em {
    ENGINE VIEWPORT (HERO 3D CANVAS & HUD)
    ========================================================================== */
 .hero-viewport-column {
+  justify-self: end;
+  max-width: 440px;
   position: relative;
   width: 100%;
 }
@@ -371,11 +373,11 @@ h1 em {
 .engine-viewport-container {
   background: var(--surface);
   border: 1px solid var(--line);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
   display: flex;
   flex-direction: column;
-  height: 480px;
-  overflow: hidden;
+  height: 380px;
+  overflow: visible;
   position: relative;
   transition: border-color 200ms ease;
 }
@@ -390,10 +392,10 @@ h1 em {
   border-bottom: 1px solid var(--line);
   display: flex;
   font-family: var(--mono);
-  font-size: 0.66rem;
-  gap: 1.2rem;
-  height: 38px;
-  padding-inline: 1rem;
+  font-size: 0.65rem;
+  gap: 1rem;
+  height: 36px;
+  padding-inline: 0.8rem;
   z-index: 5;
 }
 
@@ -430,6 +432,7 @@ h1 em {
 .engine-canvas-wrapper {
   cursor: crosshair;
   flex: 1;
+  overflow: hidden;
   position: relative;
   width: 100%;
 }
@@ -440,90 +443,315 @@ h1 em {
   width: 100%;
 }
 
+/* ==========================================================================
+   ENGINE BOTTOM BAR & TACTICAL STAGE DROPDOWN
+   ========================================================================== */
 .engine-bottom-bar {
   align-items: center;
   background: var(--surface-raised);
   border-top: 1px solid var(--line);
   display: flex;
   font-family: var(--mono);
-  gap: 0.8rem;
+  gap: 0.45rem;
+  height: 38px;
   justify-content: space-between;
-  overflow-x: auto;
-  padding: 0.4rem 0.8rem;
-  scrollbar-width: none;
-  z-index: 5;
+  padding: 0 0.6rem;
+  position: relative;
+  z-index: 20;
 }
 
-.engine-bottom-bar::-webkit-scrollbar {
-  display: none;
+.engine-dropdown-wrapper {
+  position: relative;
 }
 
-.engine-mode-group {
+.engine-dropdown-trigger {
   align-items: center;
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 0.35rem;
-}
-
-.engine-group-label {
-  color: var(--faint-ink);
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  margin-right: 0.2rem;
-  white-space: nowrap;
-}
-
-.engine-mode-btn {
-  background: transparent;
+  background: rgba(16, 23, 22, 0.9);
   border: 1px solid var(--line);
-  color: var(--muted-ink);
+  color: var(--ink);
   cursor: pointer;
+  display: inline-flex;
   font-family: var(--mono);
-  font-size: 0.62rem;
+  font-size: 0.64rem;
   font-weight: 700;
-  padding: 0.28rem 0.52rem;
+  gap: 0.35rem;
+  padding: 0.26rem 0.5rem;
   text-transform: uppercase;
   transition: all 140ms ease;
-  white-space: nowrap;
+  user-select: none;
 }
 
-.engine-mode-btn:hover {
+.engine-dropdown-trigger:hover,
+.engine-dropdown-trigger[aria-expanded='true'] {
   border-color: var(--lime);
   color: var(--lime);
 }
 
-.engine-mode-btn.active {
-  background: var(--lime);
-  border-color: var(--lime);
-  color: var(--void);
-}
-
-.engine-mode-btn.game-highlight {
+.engine-dropdown-trigger.is-game {
   border-color: rgba(0, 229, 255, 0.4);
   color: #00e5ff;
 }
 
-.engine-mode-btn.game-highlight:hover {
+.engine-dropdown-trigger.is-game:hover,
+.engine-dropdown-trigger.is-game[aria-expanded='true'] {
   border-color: #00e5ff;
-  box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+}
+
+.engine-trigger-tag {
+  color: var(--faint-ink);
+  font-size: 0.58rem;
+}
+
+.engine-dropdown-trigger.is-game .engine-trigger-tag {
+  color: rgba(0, 229, 255, 0.7);
+}
+
+.engine-trigger-name {
+  color: var(--lime);
+  font-weight: 700;
+}
+
+.engine-dropdown-trigger.is-game .engine-trigger-name {
   color: #00e5ff;
 }
 
-.engine-mode-btn.game-highlight.active {
-  background: #00e5ff;
-  border-color: #00e5ff;
-  color: #080b0e;
+.engine-chevron {
+  color: var(--faint-ink);
+  transition: transform 150ms ease;
 }
 
-.telemetry-restart-btn {
-  background: rgba(255, 117, 138, 0.15);
-  border: 1px solid #ff758a;
-  color: #ff758a;
-  cursor: pointer;
+.engine-chevron.open {
+  transform: rotate(180deg);
+}
+
+/* Floating Dropdown HUD Menu (Pops Upward over Canvas) */
+.engine-dropdown-menu {
+  animation: dropdown-fade-in 140ms ease-out;
+  backdrop-filter: blur(14px);
+  background: rgba(14, 20, 19, 0.96);
+  border: 1px solid var(--lime);
+  bottom: calc(100% + 6px);
+  box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.7), 0 0 15px rgba(196, 241, 59, 0.12);
+  display: flex;
+  flex-direction: column;
+  left: 0;
+  max-height: 275px;
+  min-width: 250px;
+  position: absolute;
+  z-index: 50;
+}
+
+@keyframes dropdown-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.engine-dropdown-header {
+  align-items: center;
+  background: rgba(196, 241, 59, 0.08);
+  border-bottom: 1px solid rgba(196, 241, 59, 0.25);
+  color: var(--lime);
+  display: flex;
   font-family: var(--mono);
   font-size: 0.6rem;
   font-weight: 700;
+  justify-content: space-between;
+  letter-spacing: 0.06em;
+  padding: 0.4rem 0.65rem;
+}
+
+.engine-mode-counter {
+  color: var(--faint-ink);
+  font-size: 0.56rem;
+}
+
+.engine-dropdown-scroll {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 0.3rem;
+  scrollbar-width: thin;
+}
+
+.engine-menu-group-header {
+  align-items: center;
+  color: var(--faint-ink);
+  display: flex;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  gap: 0.35rem;
+  letter-spacing: 0.08em;
+  padding: 0.32rem 0.45rem 0.18rem;
+  text-transform: uppercase;
+}
+
+.engine-menu-group-header.game-group-header {
+  border-top: 1px solid var(--line);
+  color: rgba(0, 229, 255, 0.7);
+  margin-top: 0.25rem;
+  padding-top: 0.4rem;
+}
+
+.engine-menu-item {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  font-family: var(--mono);
+  gap: 0.45rem;
+  padding: 0.35rem 0.45rem;
+  text-align: left;
+  transition: all 120ms ease;
+  width: 100%;
+}
+
+.engine-menu-item:hover {
+  background: rgba(196, 241, 59, 0.1);
+  border-color: rgba(196, 241, 59, 0.3);
+  color: var(--lime);
+}
+
+.engine-menu-item.active {
+  background: rgba(196, 241, 59, 0.16);
+  border-color: var(--lime);
+  color: var(--lime);
+}
+
+.engine-menu-item.game-item:hover {
+  background: rgba(0, 229, 255, 0.1);
+  border-color: rgba(0, 229, 255, 0.3);
+  color: #00e5ff;
+}
+
+.engine-menu-item.game-item.active {
+  background: rgba(0, 229, 255, 0.16);
+  border-color: #00e5ff;
+  color: #00e5ff;
+}
+
+.item-dot {
+  background: var(--line);
+  border-radius: 50%;
+  flex-shrink: 0;
+  height: 5px;
+  transition: background 120ms ease;
+  width: 5px;
+}
+
+.engine-menu-item:hover .item-dot,
+.engine-menu-item.active .item-dot {
+  background: var(--lime);
+  box-shadow: 0 0 6px var(--lime);
+}
+
+.engine-menu-item.game-item:hover .item-dot.game-dot,
+.engine-menu-item.game-item.active .item-dot.game-dot {
+  background: #00e5ff;
+  box-shadow: 0 0 6px #00e5ff;
+}
+
+.item-meta {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.item-name {
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.item-desc {
+  color: var(--faint-ink);
+  font-size: 0.54rem;
+  margin-top: 0.1rem;
+}
+
+.item-status {
+  background: var(--lime);
+  color: var(--void);
+  font-size: 0.52rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 0.08rem 0.28rem;
+}
+
+.item-status.game-status {
+  background: #00e5ff;
+  color: #080b0e;
+}
+
+/* Quick cycle buttons (< 1/7 >) */
+.engine-quick-cycle {
+  align-items: center;
+  background: rgba(16, 23, 22, 0.6);
+  border: 1px solid var(--line);
+  display: inline-flex;
+  gap: 0.15rem;
+  padding: 0.12rem 0.25rem;
+}
+
+.cycle-arrow-btn {
+  align-items: center;
+  background: transparent;
+  border: none;
+  color: var(--muted-ink);
+  cursor: pointer;
+  display: inline-flex;
+  height: 20px;
+  justify-content: center;
+  padding: 0;
+  transition: color 120ms ease;
+  width: 20px;
+}
+
+.cycle-arrow-btn:hover {
+  color: var(--lime);
+}
+
+.cycle-index {
+  color: var(--faint-ink);
+  font-size: 0.58rem;
+  font-weight: 600;
+  min-width: 22px;
+  text-align: center;
+}
+
+.engine-bottom-actions {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.4rem;
+}
+
+.engine-stage-tag {
+  color: var(--faint-ink);
+  font-size: 0.58rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.telemetry-restart-btn {
+  align-items: center;
+  background: rgba(255, 117, 138, 0.12);
+  border: 1px solid #ff758a;
+  color: #ff758a;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  gap: 0.25rem;
   padding: 0.2rem 0.45rem;
   text-transform: uppercase;
   transition: all 140ms ease;

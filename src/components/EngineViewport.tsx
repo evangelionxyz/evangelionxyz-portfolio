@@ -1,4 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react'
+import {
+  ChevronDown,
+  ChevronUp,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Gamepad2,
+  RotateCcw,
+} from 'lucide-react'
 import { gameAudio } from '../utils/audio'
 
 export type RenderMode =
@@ -76,12 +85,84 @@ interface BreakoutBrick {
   alive: boolean
 }
 
+export interface ModeOption {
+  id: RenderMode
+  label: string
+  category: 'visualizer' | 'game'
+  tag: string
+  desc: string
+  color: string
+}
+
+export const MODES: ModeOption[] = [
+  {
+    id: 'wireframe',
+    label: '3D MESH (WIREFRAME)',
+    category: 'visualizer',
+    tag: '3D MESH',
+    desc: 'Polyhedral projection & normal vectors',
+    color: '#c4f13b',
+  },
+  {
+    id: 'particles',
+    label: 'COMPUTE PARTICLES',
+    category: 'visualizer',
+    tag: 'COMPUTE',
+    desc: '3D particle velocity & force fields',
+    color: '#00e5ff',
+  },
+  {
+    id: 'terrain',
+    label: 'NEON CYBER TERRAIN',
+    category: 'visualizer',
+    tag: 'TERRAIN',
+    desc: 'Continuous infinite flight & depth fog',
+    color: '#c4f13b',
+  },
+  {
+    id: 'audio',
+    label: 'AUDIO SPECTRUM WAVE',
+    category: 'visualizer',
+    tag: 'AUDIO WAVE',
+    desc: 'Real-time DSP FFT & oscilloscope',
+    color: '#c4f13b',
+  },
+  {
+    id: 'pipeline',
+    label: 'RENDER GRAPH PIPELINE',
+    category: 'visualizer',
+    tag: 'RENDER GRAPH',
+    desc: 'Vulkan 1.3 deferred multi-pass graph',
+    color: '#00e5ff',
+  },
+  {
+    id: 'defender',
+    label: '🎮 VOID DEFENDER',
+    category: 'game',
+    tag: '🎮 DEFENDER',
+    desc: 'Vector space combat (click to fire)',
+    color: '#ff758a',
+  },
+  {
+    id: 'breakout',
+    label: '🎮 CYBER BREAKOUT',
+    category: 'game',
+    tag: '🎮 BREAKOUT',
+    desc: 'High-speed paddle & brick destruction',
+    color: '#00e5ff',
+  },
+]
+
 export const EngineViewport: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [mode, setMode] = useState<RenderMode>('wireframe')
   const [fps, setFps] = useState(60)
   const [drawCalls, setDrawCalls] = useState(14)
   const [verticesCount, setVerticesCount] = useState(12480)
+
+  // Dropdown state
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement | null>(null)
 
   // Game state counters
   const [gameScore, setGameScore] = useState(0)
@@ -674,49 +755,54 @@ export const EngineViewport: React.FC = () => {
       // 5. RENDER GRAPH / PIPELINE
       // ==========================================
       else if (mode === 'pipeline') {
+        const nodeW = Math.min(185, Math.floor((width - 48) * 0.48))
+        const nodeH = 48
+        const leftX = 14
+        const rightX = width - nodeW - 14
+
         const nodes: PipelineNode[] = [
           {
             id: 'gbuffer',
             name: '01 // GBUFFER PASS',
-            stage: 'VK_PIPELINE_BIND_POINT_GRAPHICS',
-            spec: '14 DRAW CALLS · MRT ALBEDO/NORM/DEPTH',
-            x: 28,
-            y: centerY - 130,
-            w: 195,
-            h: 56,
+            stage: 'VK_GRAPHICS_PIPELINE',
+            spec: '14 CALLS · MRT ALBEDO/DEPTH',
+            x: leftX,
+            y: centerY - 110,
+            w: nodeW,
+            h: nodeH,
             color: '#c4f13b',
           },
           {
             id: 'cull',
             name: '02 // COMPUTE CULL',
-            stage: 'VK_SHADER_STAGE_COMPUTE_BIT',
-            spec: 'HZB OCCLUSION · 32,768 INSTANCES',
-            x: width - 223,
-            y: centerY - 80,
-            w: 195,
-            h: 56,
+            stage: 'VK_SHADER_COMPUTE',
+            spec: 'HZB CULL · 32K INSTANCES',
+            x: rightX,
+            y: centerY - 65,
+            w: nodeW,
+            h: nodeH,
             color: '#00e5ff',
           },
           {
             id: 'light',
-            name: '03 // CLUSTER LIGHTING',
-            stage: 'VK_DESCRIPTOR_TYPE_STORAGE_BUFFER',
-            spec: 'FROXEL GRID 16x8x24 · SPIR-V REFLECT',
-            x: 35,
-            y: centerY + 10,
-            w: 200,
-            h: 56,
+            name: '03 // CLUSTER LIGHT',
+            stage: 'VK_STORAGE_BUFFER',
+            spec: 'FROXEL GRID 16x8x24',
+            x: leftX,
+            y: centerY + 12,
+            w: nodeW,
+            h: nodeH,
             color: '#ff758a',
           },
           {
             id: 'post',
-            name: '04 // PRESENT SWAPCHAIN',
-            stage: 'VK_IMAGE_LAYOUT_PRESENT_SRC_KHR',
-            spec: 'TAA + BLOOM · HDR10 FRAMEBUFFER',
-            x: width - 225,
-            y: centerY + 70,
-            w: 195,
-            h: 56,
+            name: '04 // PRESENT SWAP',
+            stage: 'VK_PRESENT_KHR',
+            spec: 'TAA + BLOOM · HDR10',
+            x: rightX,
+            y: centerY + 58,
+            w: nodeW,
+            h: nodeH,
             color: '#c4f13b',
           },
         ]
@@ -773,29 +859,29 @@ export const EngineViewport: React.FC = () => {
           ctx.strokeRect(n.x, n.y, n.w, n.h)
 
           ctx.fillStyle = isHovered ? n.color : '#ecf2ed'
-          ctx.font = '700 10px "DM Mono", monospace'
-          ctx.fillText(n.name, n.x + 10, n.y + 18)
+          ctx.font = '700 8.5px "DM Mono", monospace'
+          ctx.fillText(n.name, n.x + 8, n.y + 15)
 
           ctx.fillStyle = '#6f8178'
-          ctx.font = '8px "DM Mono", monospace'
-          ctx.fillText(n.stage, n.x + 10, n.y + 32)
+          ctx.font = '7px "DM Mono", monospace'
+          ctx.fillText(n.stage, n.x + 8, n.y + 27)
 
           ctx.fillStyle = '#a8b6ae'
-          ctx.font = '8px "DM Mono", monospace'
-          ctx.fillText(n.spec, n.x + 10, n.y + 46)
+          ctx.font = '7px "DM Mono", monospace'
+          ctx.fillText(n.spec, n.x + 8, n.y + 39)
         })
 
         ctx.strokeStyle = 'rgba(196, 241, 59, 0.25)'
         ctx.beginPath()
-        ctx.arc(centerX, centerY, 52, 0, Math.PI * 2)
+        ctx.arc(centerX, centerY, 42, 0, Math.PI * 2)
         ctx.stroke()
         ctx.fillStyle = '#c4f13b'
-        ctx.font = '700 9px "DM Mono", monospace'
+        ctx.font = '700 8.5px "DM Mono", monospace'
         ctx.textAlign = 'center'
-        ctx.fillText('RENDER GRAPH', centerX, centerY - 5)
+        ctx.fillText('RENDER GRAPH', centerX, centerY - 4)
         ctx.fillStyle = '#6f8178'
-        ctx.font = '8px "DM Mono", monospace'
-        ctx.fillText('VULKAN 1.3 PASS', centerX, centerY + 10)
+        ctx.font = '7px "DM Mono", monospace'
+        ctx.fillText('VULKAN 1.3 PASS', centerX, centerY + 8)
         ctx.textAlign = 'left'
       }
 
@@ -1207,6 +1293,34 @@ export const EngineViewport: React.FC = () => {
   }
 
   const isGameMode = mode === 'defender' || mode === 'breakout'
+  const currentModeMeta = MODES.find((m) => m.id === mode) || MODES[0]
+
+  const cycleMode = (direction: 1 | -1) => {
+    const currentIndex = MODES.findIndex((m) => m.id === mode)
+    const nextIndex = (currentIndex + direction + MODES.length) % MODES.length
+    switchMode(MODES[nextIndex].id)
+  }
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false)
+      }
+    }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsDropdownOpen(false)
+      }
+    }
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener('keydown', handleKeyDown)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isDropdownOpen])
 
   return (
     <div
@@ -1220,7 +1334,7 @@ export const EngineViewport: React.FC = () => {
         <div className="telemetry-item live-indicator">
           <span className="telemetry-dot" />
           <span className="telemetry-label font-mono">
-            {isGameMode ? `GAME_ARCADE // ${mode.toUpperCase()}` : `${mode.toUpperCase()}_STAGE // RUNNING`}
+            {isGameMode ? `ARCADE // ${mode.toUpperCase()}` : `${currentModeMeta.tag} // LIVE`}
           </span>
         </div>
 
@@ -1247,18 +1361,6 @@ export const EngineViewport: React.FC = () => {
                 </div>
               </>
             )}
-            <button
-              type="button"
-              className="telemetry-restart-btn"
-              onClick={() => {
-                if (mode === 'defender') resetDefenderGame()
-                else if (canvasRef.current) resetBreakoutGame(canvasRef.current.clientWidth)
-                gameAudio.playClick()
-              }}
-              data-cursor-label="RESTART GAME"
-            >
-              [RESTART]
-            </button>
           </>
         ) : (
           <>
@@ -1284,70 +1386,126 @@ export const EngineViewport: React.FC = () => {
         />
       </div>
 
-      {/* Bottom Mode Switcher & Category Controls */}
-      <div className="engine-bottom-bar multi-mode-bar">
-        <div className="engine-mode-group">
-          <span className="engine-group-label hide-mobile">VISUALIZERS:</span>
+      {/* Bottom Mode Switcher & Tactical HUD Dropdown */}
+      <div className="engine-bottom-bar">
+        {/* Mode Dropdown Selector */}
+        <div className="engine-dropdown-wrapper" ref={dropdownRef}>
           <button
             type="button"
-            className={`engine-mode-btn ${mode === 'wireframe' ? 'active' : ''}`}
-            onClick={() => switchMode('wireframe')}
-            data-cursor-label="3D // WIREFRAME"
+            className={`engine-dropdown-trigger ${isGameMode ? 'is-game' : ''}`}
+            onClick={() => {
+              setIsDropdownOpen((prev) => !prev)
+              gameAudio.playClick()
+            }}
+            data-cursor-label="SWITCH // STAGE"
+            aria-expanded={isDropdownOpen}
           >
-            [3D MESH]
+            <span className="engine-trigger-tag">{isGameMode ? 'GAME' : 'STAGE'}:</span>
+            <span className="engine-trigger-name">{currentModeMeta.tag}</span>
+            <ChevronUp size={13} className={`engine-chevron ${isDropdownOpen ? 'open' : ''}`} />
           </button>
+
+          {isDropdownOpen && (
+            <div className="engine-dropdown-menu" role="menu">
+              <div className="engine-dropdown-header">
+                <span>// SELECT VIEWPORT STAGE</span>
+                <span className="engine-mode-counter">{MODES.length} MODES</span>
+              </div>
+
+              <div className="engine-dropdown-scroll">
+                <div className="engine-menu-group-header">
+                  <Eye size={11} /> VISUALIZERS (5)
+                </div>
+                {MODES.filter((m) => m.category === 'visualizer').map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    className={`engine-menu-item ${mode === m.id ? 'active' : ''}`}
+                    onClick={() => {
+                      switchMode(m.id)
+                      setIsDropdownOpen(false)
+                    }}
+                    data-cursor-label={`STAGE // ${m.tag}`}
+                  >
+                    <div className="item-dot" />
+                    <div className="item-meta">
+                      <span className="item-name">{m.label}</span>
+                      <span className="item-desc">{m.desc}</span>
+                    </div>
+                    {mode === m.id && <span className="item-status">ACTIVE</span>}
+                  </button>
+                ))}
+
+                <div className="engine-menu-group-header game-group-header">
+                  <Gamepad2 size={11} /> PLAYABLE ARCADE GAMES (2)
+                </div>
+                {MODES.filter((m) => m.category === 'game').map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    className={`engine-menu-item game-item ${mode === m.id ? 'active' : ''}`}
+                    onClick={() => {
+                      switchMode(m.id)
+                      setIsDropdownOpen(false)
+                    }}
+                    data-cursor-label={`PLAY // ${m.tag}`}
+                  >
+                    <div className="item-dot game-dot" />
+                    <div className="item-meta">
+                      <span className="item-name">{m.label}</span>
+                      <span className="item-desc">{m.desc}</span>
+                    </div>
+                    {mode === m.id && <span className="item-status game-status">ACTIVE</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Quick Cycle Nav */}
+        <div className="engine-quick-cycle">
           <button
             type="button"
-            className={`engine-mode-btn ${mode === 'particles' ? 'active' : ''}`}
-            onClick={() => switchMode('particles')}
-            data-cursor-label="COMPUTE // PARTICLES"
+            className="cycle-arrow-btn"
+            onClick={() => cycleMode(-1)}
+            title="Previous stage"
+            data-cursor-label="PREV STAGE"
           >
-            [COMPUTE]
+            <ChevronLeft size={13} />
           </button>
+          <span className="cycle-index">
+            {MODES.findIndex((m) => m.id === mode) + 1}/{MODES.length}
+          </span>
           <button
             type="button"
-            className={`engine-mode-btn ${mode === 'terrain' ? 'active' : ''}`}
-            onClick={() => switchMode('terrain')}
-            data-cursor-label="NEON // TERRAIN"
+            className="cycle-arrow-btn"
+            onClick={() => cycleMode(1)}
+            title="Next stage"
+            data-cursor-label="NEXT STAGE"
           >
-            [TERRAIN]
-          </button>
-          <button
-            type="button"
-            className={`engine-mode-btn ${mode === 'audio' ? 'active' : ''}`}
-            onClick={() => switchMode('audio')}
-            data-cursor-label="AUDIO // EQUALIZER"
-          >
-            [AUDIO WAVE]
-          </button>
-          <button
-            type="button"
-            className={`engine-mode-btn ${mode === 'pipeline' ? 'active' : ''}`}
-            onClick={() => switchMode('pipeline')}
-            data-cursor-label="GRAPH // PIPELINE"
-          >
-            [RENDER GRAPH]
+            <ChevronRight size={13} />
           </button>
         </div>
 
-        <div className="engine-mode-group game-group">
-          <span className="engine-group-label hide-mobile">GAMES:</span>
-          <button
-            type="button"
-            className={`engine-mode-btn game-highlight ${mode === 'defender' ? 'active' : ''}`}
-            onClick={() => switchMode('defender')}
-            data-cursor-label="PLAY // DEFENDER"
-          >
-            [🎮 DEFENDER]
-          </button>
-          <button
-            type="button"
-            className={`engine-mode-btn game-highlight ${mode === 'breakout' ? 'active' : ''}`}
-            onClick={() => switchMode('breakout')}
-            data-cursor-label="PLAY // BREAKOUT"
-          >
-            [🎮 BREAKOUT]
-          </button>
+        {/* Right Side: Game Action or Tech Spec */}
+        <div className="engine-bottom-actions">
+          {isGameMode ? (
+            <button
+              type="button"
+              className="telemetry-restart-btn"
+              onClick={() => {
+                if (mode === 'defender') resetDefenderGame()
+                else if (canvasRef.current) resetBreakoutGame(canvasRef.current.clientWidth)
+                gameAudio.playClick()
+              }}
+              data-cursor-label="RESTART GAME"
+            >
+              <RotateCcw size={10} /> RESTART
+            </button>
+          ) : (
+            <span className="engine-stage-tag hide-mobile">RHI // VK 1.3</span>
+          )}
         </div>
       </div>
     </div>
