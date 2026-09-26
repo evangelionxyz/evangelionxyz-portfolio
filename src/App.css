@@ -1402,7 +1402,7 @@ footer {
   color: var(--faint-ink);
   display: flex;
   font-family: var(--mono);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   justify-content: space-between;
   letter-spacing: 0.03em;
   padding-block: 1.5rem;
@@ -1411,7 +1411,7 @@ footer {
 .footer-left {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.34rem;
 }
 
 .footer-left p {

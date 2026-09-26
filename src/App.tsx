@@ -147,7 +147,7 @@ const techArsenal: TechItem[] = [
   {
     id: 'dotnet',
     name: '.NET & CoreCLR',
-    version: '.NET 8 / 9',
+    version: '.NET 10',
     category: 'runtimes',
     categoryLabel: 'Managed Runtime & Interop',
     icon: DotNetIcon,
@@ -159,7 +159,7 @@ const techArsenal: TechItem[] = [
   {
     id: 'csharp',
     name: 'C#',
-    version: 'C# 12 / 13',
+    version: 'C# 14',
     category: 'runtimes',
     categoryLabel: 'Engine Scripting',
     icon: CSharpIcon,
@@ -171,7 +171,7 @@ const techArsenal: TechItem[] = [
   {
     id: 'typescript',
     name: 'TypeScript',
-    version: '5.x',
+    version: '7.x',
     category: 'web',
     categoryLabel: 'Full-Stack Language',
     icon: TypeScriptIcon,
@@ -456,7 +456,7 @@ function App() {
             <span className="wordmark-name">{profile.shortName}</span>
             <span className="wordmark-dot">.</span>
           </span>
-          <span className="wordmark-badge">SYS // VULKAN</span>
+          <span className="wordmark-badge">SYS // ONLINE</span>
         </a>
 
         {/* Gamified HUD Controls */}
@@ -578,7 +578,7 @@ function App() {
           <p className="section-kicker">01 // Engineering Profile</p>
           <div className="profile-spec-box">
             <div className="spec-row">
-              <span className="spec-k">OPERATOR:</span>
+              <span className="spec-k">NAME:</span>
               <span className="spec-v">{profile.name}</span>
             </div>
             <div className="spec-row">
