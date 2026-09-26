@@ -440,36 +440,38 @@ h1 em {
   width: 100%;
 }
 
-.engine-artwork-overlay {
-  align-items: center;
-  display: flex;
-  inset: 0;
-  justify-content: center;
-  pointer-events: none;
-  position: absolute;
-}
-
-.engine-artwork-overlay img {
-  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.8));
-  max-width: 65%;
-  transform: translateY(8px) rotate(-3deg);
-}
-
 .engine-bottom-bar {
   align-items: center;
   background: var(--surface-raised);
   border-top: 1px solid var(--line);
   display: flex;
   font-family: var(--mono);
-  height: 42px;
+  gap: 0.8rem;
   justify-content: space-between;
-  padding-inline: 0.75rem 1rem;
+  overflow-x: auto;
+  padding: 0.4rem 0.8rem;
+  scrollbar-width: none;
   z-index: 5;
 }
 
-.engine-mode-toggles {
+.engine-bottom-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.engine-mode-group {
+  align-items: center;
   display: flex;
-  gap: 0.4rem;
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+}
+
+.engine-group-label {
+  color: var(--faint-ink);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin-right: 0.2rem;
+  white-space: nowrap;
 }
 
 .engine-mode-btn {
@@ -478,11 +480,12 @@ h1 em {
   color: var(--muted-ink);
   cursor: pointer;
   font-family: var(--mono);
-  font-size: 0.64rem;
+  font-size: 0.62rem;
   font-weight: 700;
-  padding: 0.3rem 0.55rem;
+  padding: 0.28rem 0.52rem;
   text-transform: uppercase;
   transition: all 140ms ease;
+  white-space: nowrap;
 }
 
 .engine-mode-btn:hover {
@@ -496,11 +499,39 @@ h1 em {
   color: var(--void);
 }
 
-.engine-spec-readout {
-  color: var(--faint-ink);
-  font-size: 0.65rem;
-  letter-spacing: 0.05em;
+.engine-mode-btn.game-highlight {
+  border-color: rgba(0, 229, 255, 0.4);
+  color: #00e5ff;
+}
+
+.engine-mode-btn.game-highlight:hover {
+  border-color: #00e5ff;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+  color: #00e5ff;
+}
+
+.engine-mode-btn.game-highlight.active {
+  background: #00e5ff;
+  border-color: #00e5ff;
+  color: #080b0e;
+}
+
+.telemetry-restart-btn {
+  background: rgba(255, 117, 138, 0.15);
+  border: 1px solid #ff758a;
+  color: #ff758a;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 0.2rem 0.45rem;
   text-transform: uppercase;
+  transition: all 140ms ease;
+}
+
+.telemetry-restart-btn:hover {
+  background: #ff758a;
+  color: #080b0e;
 }
 
 /* ==========================================================================

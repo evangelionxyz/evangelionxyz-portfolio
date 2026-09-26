@@ -44,7 +44,14 @@ export const EngineConsole: React.FC = () => {
       case 'help':
         newLogs.push({
           type: 'output',
-          text: 'AVAILABLE COMMANDS:\n  • about     - Who is Evangelion Manuhutu?\n  • vulkan    - Low-level Vulkan 1.3 architecture\n  • cpp       - C++20/23, ECS & systems design\n  • dotnet    - CoreCLR & MochiSharp hostfxr\n  • rust      - Systems tooling & OpenTask\n  • projects  - Explore open-source repositories\n  • stats     - Engineering telemetry & metrics\n  • contact   - Communication endpoints\n  • clear     - Flush console output',
+          text: 'AVAILABLE COMMANDS:\n  • about     - Who is Evangelion Manuhutu?\n  • games     - Viewport arcade mini-games\n  • vulkan    - Low-level Vulkan 1.3 architecture\n  • cpp       - C++20/23, ECS & systems design\n  • dotnet    - CoreCLR & MochiSharp hostfxr\n  • rust      - Systems tooling & OpenTask\n  • projects  - Explore open-source repositories\n  • stats     - Engineering telemetry & metrics\n  • contact   - Communication endpoints\n  • clear     - Flush console output',
+        })
+        break
+      case 'games':
+      case 'game':
+        newLogs.push({
+          type: 'output',
+          text: 'IGNITE VIEWPORT MINI-GAMES:\n  1. [VECTOR DEFENDER] - Vector arcade shooter. Move ship with mouse, click to fire twin lasers, blast incoming drone polygons, build combos!\n  2. [CYBER BREAKOUT]  - High-speed photon paddle game. Steer paddle with mouse to shatter GPU pipeline blocks (Vulkan, DX12, C++, Rust).\n  Access them directly in the hero engine viewport!',
         })
         break
       case 'about':
@@ -165,7 +172,7 @@ export const EngineConsole: React.FC = () => {
             {/* Quick Command Chips */}
             <div className="console-chips">
               <span className="chip-label">QUICK EXEC:</span>
-              {['help', 'vulkan', 'cpp', 'dotnet', 'projects', 'stats', 'clear'].map((cmd) => (
+              {['help', 'games', 'vulkan', 'cpp', 'dotnet', 'projects', 'stats', 'clear'].map((cmd) => (
                 <button
                   key={cmd}
                   type="button"

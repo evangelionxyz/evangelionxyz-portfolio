@@ -66,6 +66,66 @@ class GamifiedAudio {
       // AudioContext policy catch
     }
   }
+
+  public playLaser() {
+    if (!this.enabled || !this.ctx) return
+    try {
+      if (this.ctx.state === 'suspended') this.ctx.resume()
+      const osc = this.ctx.createOscillator()
+      const gain = this.ctx.createGain()
+      osc.type = 'sawtooth'
+      osc.frequency.setValueAtTime(840, this.ctx.currentTime)
+      osc.frequency.exponentialRampToValueAtTime(140, this.ctx.currentTime + 0.08)
+      gain.gain.setValueAtTime(0.035, this.ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.08)
+      osc.connect(gain)
+      gain.connect(this.ctx.destination)
+      osc.start()
+      osc.stop(this.ctx.currentTime + 0.08)
+    } catch {
+      // AudioContext policy catch
+    }
+  }
+
+  public playExplosion() {
+    if (!this.enabled || !this.ctx) return
+    try {
+      if (this.ctx.state === 'suspended') this.ctx.resume()
+      const osc = this.ctx.createOscillator()
+      const gain = this.ctx.createGain()
+      osc.type = 'triangle'
+      osc.frequency.setValueAtTime(180, this.ctx.currentTime)
+      osc.frequency.exponentialRampToValueAtTime(35, this.ctx.currentTime + 0.16)
+      gain.gain.setValueAtTime(0.05, this.ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.16)
+      osc.connect(gain)
+      gain.connect(this.ctx.destination)
+      osc.start()
+      osc.stop(this.ctx.currentTime + 0.16)
+    } catch {
+      // AudioContext policy catch
+    }
+  }
+
+  public playScore() {
+    if (!this.enabled || !this.ctx) return
+    try {
+      if (this.ctx.state === 'suspended') this.ctx.resume()
+      const osc = this.ctx.createOscillator()
+      const gain = this.ctx.createGain()
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(587.33, this.ctx.currentTime)
+      osc.frequency.setValueAtTime(880, this.ctx.currentTime + 0.05)
+      gain.gain.setValueAtTime(0.035, this.ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.12)
+      osc.connect(gain)
+      gain.connect(this.ctx.destination)
+      osc.start()
+      osc.stop(this.ctx.currentTime + 0.12)
+    } catch {
+      // AudioContext policy catch
+    }
+  }
 }
 
 export const gameAudio = new GamifiedAudio()
