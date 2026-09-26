@@ -1,0 +1,52 @@
+<svg width="64" height="64" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="fav-lime" x1="10" y1="10" x2="110" y2="110" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#d9ff55" />
+      <stop offset="100%" stopColor="#a6d918" />
+    </linearGradient>
+    <linearGradient id="fav-cyan" x1="10" y1="110" x2="110" y2="10" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#00b0ff" />
+      <stop offset="100%" stopColor="#00e5ff" />
+    </linearGradient>
+    <linearGradient id="fav-accent" x1="20" y1="20" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#ff758a" />
+      <stop offset="100%" stopColor="#ed506e" />
+    </linearGradient>
+  </defs>
+
+  <!-- Outer Hexagonal Shield / Engine Frame -->
+  <path
+    d="M60 6L108 34V86L60 114L12 86V34L60 6Z"
+    fill="#080b0e"
+    stroke="#2b3938"
+    stroke-width="4"
+  />
+
+  <!-- Top Arm of "E" (Lime) -->
+  <path
+    d="M26 36L60 17L94 36L78 45L60 35L42 45L26 36Z"
+    fill="url(#fav-lime)"
+  />
+
+  <!-- Middle Core Bar of "E" (Cyan) -->
+  <path
+    d="M34 56L60 41L86 56L72 64L60 57L48 64L34 56Z"
+    fill="url(#fav-cyan)"
+  />
+
+  <!-- Lower Base Plate of "E" (Pink Accent) -->
+  <path
+    d="M26 76L60 57L94 76L78 85L60 75L42 85L26 76Z"
+    fill="url(#fav-accent)"
+  />
+
+  <!-- Vertical Spine Linking the Letter "E" -->
+  <path
+    d="M26 36L42 45V85L26 76V36Z"
+    fill="#c4f13b"
+  />
+
+  <!-- Central Vertex Node -->
+  <circle cx="60" cy="60" r="5.5" fill="#ffffff" />
+  <circle cx="60" cy="60" r="3" fill="#080b0e" />
+</svg>

@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Serif+Display:ital@0;1&display=swap');
+
+:root {
+  --void: #080b0e;
+  --surface: #10171b;
+  --surface-raised: #182126;
+  --ink: #ecf2ed;
+  --muted-ink: #a8b6ae;
+  --faint-ink: #6f8178;
+  --line: #2b3938;
+  --accent: #ed506e;
+  --accent-deep: #ff758a;
+  --lime: #c4f13b;
+  --lime-muted: #a6c937;
+  --display: 'DM Sans', 'Segoe UI', sans-serif;
+  --serif: 'DM Serif Display', Georgia, serif;
+  --mono: 'DM Mono', Consolas, monospace;
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 17px;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--void); margin: 0; min-width: 320px; }
+button, a { font: inherit; }
+::selection { background: var(--lime); color: var(--void); }
+* :focus-visible { outline: 2px solid var(--lime); outline-offset: 4px; }
