@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
 import {
-  ChevronDown,
   ChevronUp,
   ChevronLeft,
   ChevronRight,
@@ -9,6 +8,11 @@ import {
   RotateCcw,
 } from 'lucide-react'
 import { gameAudio } from '../utils/audio'
+import {
+  getInitialSuzanneMesh,
+  loadSuzanneMesh,
+  type ParsedGLTFMesh,
+} from '../utils/gltfLoader'
 
 export type RenderMode =
   | 'wireframe'
@@ -19,11 +23,6 @@ export type RenderMode =
   | 'defender'
   | 'breakout'
 
-interface Point3D {
-  x: number
-  y: number
-  z: number
-}
 
 interface PipelineNode {
   id: string
@@ -85,7 +84,7 @@ interface BreakoutBrick {
   alive: boolean
 }
 
-export interface ModeOption {
+interface ModeOption {
   id: RenderMode
   label: string
   category: 'visualizer' | 'game'
@@ -94,13 +93,13 @@ export interface ModeOption {
   color: string
 }
 
-export const MODES: ModeOption[] = [
+const MODES: ModeOption[] = [
   {
     id: 'wireframe',
-    label: '3D MESH (WIREFRAME)',
+    label: 'SUZANNE 3D (GLTF)',
     category: 'visualizer',
-    tag: '3D MESH',
-    desc: 'Polyhedral projection & normal vectors',
+    tag: 'SUZANNE GLTF',
+    desc: 'Blender Suzanne glTF wireframe & normal vectors',
     color: '#c4f13b',
   },
   {
@@ -137,17 +136,17 @@ export const MODES: ModeOption[] = [
   },
   {
     id: 'defender',
-    label: '🎮 VOID DEFENDER',
+    label: 'VOID DEFENDER',
     category: 'game',
-    tag: '🎮 DEFENDER',
+    tag: 'DEFENDER',
     desc: 'Vector space combat (click to fire)',
     color: '#ff758a',
   },
   {
     id: 'breakout',
-    label: '🎮 CYBER BREAKOUT',
+    label: 'CYBER BREAKOUT',
     category: 'game',
-    tag: '🎮 BREAKOUT',
+    tag: 'BREAKOUT',
     desc: 'High-speed paddle & brick destruction',
     color: '#00e5ff',
   },
@@ -155,10 +154,36 @@ export const MODES: ModeOption[] = [
 
 export const EngineViewport: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const [suzanneMesh, setSuzanneMesh] = useState<ParsedGLTFMesh>(() => getInitialSuzanneMesh())
+  const suzanneMeshRef = useRef<ParsedGLTFMesh>(suzanneMesh)
+
+  useEffect(() => {
+    suzanneMeshRef.current = suzanneMesh
+  }, [suzanneMesh])
+
   const [mode, setMode] = useState<RenderMode>('wireframe')
   const [fps, setFps] = useState(60)
-  const [drawCalls, setDrawCalls] = useState(14)
-  const [verticesCount, setVerticesCount] = useState(12480)
+  const [drawCalls, setDrawCalls] = useState(2)
+  const [verticesCount, setVerticesCount] = useState(507)
+
+  useEffect(() => {
+    let isMounted = true
+    loadSuzanneMesh()
+      .then((mesh) => {
+        if (isMounted) {
+          setSuzanneMesh(mesh)
+          if (mode === 'wireframe') {
+            setVerticesCount(mesh.vertices.length)
+          }
+        }
+      })
+      .catch((err) => {
+        console.warn('Failed to load dynamic Suzanne glTF:', err)
+      })
+    return () => {
+      isMounted = false
+    }
+  }, [mode])
 
   // Dropdown state
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -230,7 +255,7 @@ export const EngineViewport: React.FC = () => {
       score: 0,
       kills: 0,
       combo: 1,
-      lastSpawn: performance.now(),
+      lastSpawn: 0,
       screenShake: 0,
     }
     setGameScore(0)
@@ -303,40 +328,6 @@ export const EngineViewport: React.FC = () => {
     }
     resize()
     window.addEventListener('resize', resize)
-
-    // Setup 3D vertices for Wireframe mode
-    const phi = (1 + Math.sqrt(5)) / 2
-    const baseVertices: Point3D[] = [
-      { x: -1, y: phi, z: 0 },
-      { x: 1, y: phi, z: 0 },
-      { x: -1, y: -phi, z: 0 },
-      { x: 1, y: -phi, z: 0 },
-      { x: 0, y: -1, z: phi },
-      { x: 0, y: 1, z: phi },
-      { x: 0, y: -1, z: -phi },
-      { x: 0, y: 1, z: -phi },
-      { x: phi, y: 0, z: -1 },
-      { x: phi, y: 0, z: 1 },
-      { x: -phi, y: 0, z: -1 },
-      { x: -phi, y: 0, z: 1 },
-    ].map((v) => {
-      const len = Math.hypot(v.x, v.y, v.z)
-      return { x: (v.x / len) * 115, y: (v.y / len) * 115, z: (v.z / len) * 115 }
-    })
-
-    const edges: [number, number][] = []
-    for (let i = 0; i < baseVertices.length; i++) {
-      for (let j = i + 1; j < baseVertices.length; j++) {
-        const d = Math.hypot(
-          baseVertices[i].x - baseVertices[j].x,
-          baseVertices[i].y - baseVertices[j].y,
-          baseVertices[i].z - baseVertices[j].z
-        )
-        if (d < 160) {
-          edges.push([i, j])
-        }
-      }
-    }
 
     // Setup particles for Compute mode
     const numParticles = 160
@@ -432,56 +423,135 @@ export const EngineViewport: React.FC = () => {
       }
 
       // ==========================================
-      // 1. 3D MESH (WIREFRAME POLYHEDRON)
+      // 1. SUZANNE 3D MESH (GLTF WIREFRAME)
       // ==========================================
       if (mode === 'wireframe') {
-        angle += 0.8 * dt
-        rotX = 0.2 + mousePosRef.current.y * 0.0025
-        rotY = angle + mousePosRef.current.x * 0.003
+        const mesh = suzanneMeshRef.current
+        const verts = mesh.vertices
+        const edges = mesh.edges
+        const triangles = mesh.triangles
+
+        angle += 0.65 * dt
+        rotX = 0.16 + mousePosRef.current.y * 0.002
+        rotY = angle + mousePosRef.current.x * 0.0025
 
         const cosX = Math.cos(rotX)
         const sinX = Math.sin(rotX)
         const cosY = Math.cos(rotY)
         const sinY = Math.sin(rotY)
 
-        const projected = baseVertices.map((v) => {
-          const x1 = v.x * cosY - v.z * sinY
-          const z1 = v.x * sinY + v.z * cosY
-          const y2 = v.y * cosX - z1 * sinX
-          const z2 = v.y * sinX + z1 * cosX
+        // Adaptive mesh scale based on viewport dimensions
+        const meshScale = Math.min(width, height) * 0.225
+        const fov = 380
+        const camDist = 340
 
-          const fov = 420
-          const scale = fov / (fov + z2)
-          return {
-            x: centerX + x1 * scale,
-            y: centerY + y2 * scale,
-            z: z2,
-            scale,
+        // Project 3D vertices into camera screen coordinates
+        const projectedX = new Float32Array(verts.length)
+        const projectedY = new Float32Array(verts.length)
+        const projectedZ = new Float32Array(verts.length)
+        const projectedScale = new Float32Array(verts.length)
+
+        for (let i = 0; i < verts.length; i++) {
+          const v = verts[i]
+          const vx = (v.x - mesh.bounds.center.x) * meshScale
+          const vy = (v.y - mesh.bounds.center.y) * meshScale
+          const vz = (v.z - mesh.bounds.center.z) * meshScale
+
+          // Yaw (around Y axis)
+          const x1 = vx * cosY + vz * sinY
+          const z1 = -vx * sinY + vz * cosY
+
+          // Pitch (around X axis)
+          const y2 = vy * cosX - z1 * sinX
+          const z2 = vy * sinX + z1 * cosX
+
+          const zEff = camDist - z2
+          const scale = fov / Math.max(15, zEff)
+
+          projectedX[i] = centerX + x1 * scale
+          projectedY[i] = centerY - y2 * scale
+          projectedZ[i] = z2
+          projectedScale[i] = scale
+        }
+
+        // Pass 1: Background Wireframe (Far/Deep edges, z <= 0)
+        ctx.strokeStyle = 'rgba(196, 241, 59, 0.2)'
+        ctx.lineWidth = 0.95
+        ctx.shadowBlur = 0
+        ctx.beginPath()
+        for (let e = 0; e < edges.length; e++) {
+          const [i, j] = edges[e]
+          if (projectedZ[i] + projectedZ[j] <= 0) {
+            ctx.moveTo(projectedX[i], projectedY[i])
+            ctx.lineTo(projectedX[j], projectedY[j])
           }
-        })
+        }
+        ctx.stroke()
 
-        // Draw edges
-        ctx.strokeStyle = 'rgba(196, 241, 59, 0.75)'
-        ctx.lineWidth = 1.6
+        // Pass 2: Foreground Wireframe (Near/Front edges, z > 0) with Vibrant Neon Glow
+        ctx.strokeStyle = 'rgba(196, 241, 59, 0.85)'
+        ctx.lineWidth = 1.35
         ctx.shadowColor = '#c4f13b'
-        ctx.shadowBlur = 8
+        ctx.shadowBlur = 6
+        ctx.beginPath()
+        for (let e = 0; e < edges.length; e++) {
+          const [i, j] = edges[e]
+          if (projectedZ[i] + projectedZ[j] > 0) {
+            ctx.moveTo(projectedX[i], projectedY[i])
+            ctx.lineTo(projectedX[j], projectedY[j])
+          }
+        }
+        ctx.stroke()
+        ctx.shadowBlur = 0
 
-        edges.forEach(([i, j]) => {
-          const p1 = projected[i]
-          const p2 = projected[j]
-          ctx.beginPath()
-          ctx.moveTo(p1.x, p1.y)
-          ctx.lineTo(p2.x, p2.y)
-          ctx.stroke()
-        })
+        // Pass 3: Real-Time Surface Normal Vectors (Debug Vis on Front-Facing Triangles)
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.65)'
+        ctx.lineWidth = 1.0
+        ctx.beginPath()
+        for (let t = 0; t < triangles.length; t += 3) {
+          const tri = triangles[t]
+          const N = tri.normal
 
-        // Draw vertex nodes
-        projected.forEach((p) => {
-          ctx.fillStyle = '#ffffff'
-          ctx.beginPath()
-          ctx.arc(p.x, p.y, 3.2 * p.scale, 0, Math.PI * 2)
-          ctx.fill()
-        })
+          // Rotate normal vector
+          const nx1 = N.x * cosY + N.z * sinY
+          const nz1 = -N.x * sinY + N.z * cosY
+          const ny2 = N.y * cosX - nz1 * sinX
+          const nz2 = N.y * sinX + nz1 * cosX
+
+          // Check if facing camera
+          if (nz2 > 0.18) {
+            const [i0, i1, i2] = tri.indices
+            const cx = (projectedX[i0] + projectedX[i1] + projectedX[i2]) / 3
+            const cy = (projectedY[i0] + projectedY[i1] + projectedY[i2]) / 3
+            const avgScale = (projectedScale[i0] + projectedScale[i1] + projectedScale[i2]) / 3
+            const stemLen = 9 * avgScale
+
+            ctx.moveTo(cx, cy)
+            ctx.lineTo(cx + nx1 * stemLen, cy - ny2 * stemLen)
+          }
+        }
+        ctx.stroke()
+
+        // Pass 4: Glowing Vertex Nodes on Silhouette / Front Features
+        ctx.fillStyle = '#ffffff'
+        ctx.shadowColor = '#c4f13b'
+        ctx.shadowBlur = 4
+        for (let i = 0; i < verts.length; i++) {
+          if (projectedZ[i] > 28) {
+            ctx.beginPath()
+            ctx.arc(projectedX[i], projectedY[i], 1.5 * projectedScale[i], 0, Math.PI * 2)
+            ctx.fill()
+          }
+        }
+        ctx.shadowBlur = 0
+
+        // In-Canvas GLTF Telemetry Metadata Overlay
+        ctx.fillStyle = 'rgba(196, 241, 59, 0.7)'
+        ctx.font = '700 8.5px "DM Mono", monospace'
+        ctx.fillText(`MODEL: ${mesh.name.toUpperCase()} // GLTF 2.0 · ${verts.length} VERTS · ${edges.length.toLocaleString()} EDGES`, 20, height - 32)
+        ctx.fillStyle = 'rgba(0, 229, 255, 0.7)'
+        ctx.fillText('NORMALS: ACTIVE // VK_POLYGON_MODE_LINE', 20, height - 16)
+        ctx.textAlign = 'left'
       }
 
       // ==========================================
@@ -1265,8 +1335,8 @@ export const EngineViewport: React.FC = () => {
     setMode(newMode)
     gameAudio.playClick()
     if (newMode === 'wireframe') {
-      setDrawCalls(14)
-      setVerticesCount(12480)
+      setDrawCalls(2)
+      setVerticesCount(suzanneMeshRef.current.vertices.length || 507)
     } else if (newMode === 'particles') {
       setDrawCalls(2)
       setVerticesCount(32768)
@@ -1372,6 +1442,12 @@ export const EngineViewport: React.FC = () => {
               <span className="telemetry-muted">VERTS:</span>
               <span className="telemetry-val font-mono">{verticesCount.toLocaleString()}</span>
             </div>
+            {mode === 'wireframe' && (
+              <div className="telemetry-item hide-mobile">
+                <span className="telemetry-muted">EDGES:</span>
+                <span className="telemetry-val font-mono">{suzanneMesh.edges.length.toLocaleString()}</span>
+              </div>
+            )}
           </>
         )}
       </div>

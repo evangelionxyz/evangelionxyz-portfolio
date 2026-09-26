@@ -411,8 +411,8 @@ function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [activeTechFilter, setActiveTechFilter] = useState<TechCategory>('all')
   const [selectedTech, setSelectedTech] = useState<TechItem | null>(null)
-  const [cursorActive, setCursorActive] = useState(false)
-  const [soundActive, setSoundActive] = useState(false)
+  const [cursorActive, setCursorActive] = useState(true)
+  const [soundActive, setSoundActive] = useState(true)
 
   const closeMenu = () => setIsMenuOpen(false)
 
