@@ -575,7 +575,7 @@ function App() {
       {/* Detailed About Section */}
       <section className="intro-section" id="about">
         <div className="intro-header-col">
-          <p className="section-kicker">01 // Engineering Profile</p>
+          <label className="section-kicker">01 // Engineering Profile</label>
           <div className="profile-spec-box">
             <div className="spec-row">
               <span className="spec-k">NAME:</span>
@@ -620,7 +620,7 @@ function App() {
       <section className="arsenal-section" id="arsenal">
         <div className="section-heading">
           <div>
-            <p className="section-kicker">02 // Systems & API Radar</p>
+            <label className="section-kicker">02 // Systems & API Radar</label>
             <h2>Tools chosen for precision, control, and zero-cost abstraction.</h2>
           </div>
           <p className="section-subtitle">
@@ -730,7 +730,7 @@ function App() {
       <section className="capabilities-section" aria-labelledby="capabilities-heading">
         <div className="section-heading">
           <div>
-            <p className="section-kicker">03 // Technical Specializations</p>
+            <label className="section-kicker">03 // Technical Specializations</label>
             <h2 id="capabilities-heading">Engineering across hardware, runtimes, and user interfaces.</h2>
           </div>
         </div>
@@ -752,7 +752,7 @@ function App() {
       {/* Selected Projects with Tech Badges and Source Links */}
       <section className="work-section" id="work">
         <div className="work-intro">
-          <p className="section-kicker">04 // Featured Implementations</p>
+          <label className="section-kicker">04 // Featured Implementations</label>
           <h2>Exploring the technology underneath interactive software.</h2>
           <p>
             My strongest projects begin where abstractions end: a custom graphics backend, an interop runtime boundary, a bytecode shader compiler, or a full-stack platform built for resilience.
@@ -815,7 +815,7 @@ function App() {
       <section className="philosophy-section" id="philosophy">
         <div className="section-heading">
           <div>
-            <p className="section-kicker">05 // Engineering Philosophy</p>
+            <label className="section-kicker">05 // Engineering Philosophy</label>
             <h2>Understanding the machine underneath the abstractions.</h2>
           </div>
           <p className="section-subtitle">
@@ -836,7 +836,7 @@ function App() {
 
       {/* Contact Section */}
       <section className="contact-section" id="contact">
-        <p className="section-kicker">06 // Connect & Collaborate</p>
+        <label className="section-kicker">06 // Connect & Collaborate</label>
         <h2>Have a system worth thinking through?</h2>
         <p>
           Let&apos;s talk about graphics programming, Vulkan/DirectX architecture, C++ runtime systems, game engine technology, or hard engineering challenges that require patient, first-principles execution.
@@ -849,7 +849,7 @@ function App() {
       </section>
 
       {/* Footer */}
-      <footer>
+      <footer style={{paddingBottom:"4.3rem"}}>
         <div className="footer-left">
           <p>© {new Date().getFullYear()} {profile.name}. Built with Bun.</p>
           <span className="footer-meta">TELKOM UNIVERSITY · BANDUNG, ID</span>
